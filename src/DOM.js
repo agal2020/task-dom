@@ -1,3 +1,6 @@
+import { doc } from 'prettier';
+import { isTaggedTemplateExpression } from 'typescript';
+
 /*
   В функцию appendToBody передаются 3 параметра:
   tag - имя тега, content - содержимое тега и count - количество вставок.
@@ -5,6 +8,11 @@
   Считаем, что всегда передается тег, допускающий вставку текста в качестве своего содержимого (P, DIV, I и пр.).
 */
 export function appendToBody(tag, content, count) {
+    for (let i = 0; i < count; ++i) {
+        let tagToAppend = document.createElement(tag);
+        tagToAppend.innerHTML = content;
+        document.body.append(tagToAppend);
+    }
 }
 
 /*
@@ -15,6 +23,20 @@ export function appendToBody(tag, content, count) {
   Сформированное дерево верните в качестве результата работы функции.
 */
 export function generateTree(childrenCount, level) {
+    return createNode(childrenCount, 1, level);
+}
+
+function createNode(childrenCount, level, maxLevel) {
+    let tag = document.createElement('div');
+    tag.className = 'item_' + level;
+
+    if (level === maxLevel) return tag;
+
+    for (let i = 0; i < childrenCount; ++i) {
+        tag.append(createNode(childrenCount, level + 1, maxLevel));
+    }
+
+    return tag;
 }
 
 /*
@@ -26,4 +48,17 @@ export function generateTree(childrenCount, level) {
   Сформированное дерево верните в качестве результата работы функции.
 */
 export function replaceNodes() {
+    let tree = generateTree(2, 3);
+
+    let elems = tree.getElementsByClassName('item_2');
+
+    for (let element of elems) {
+        const sect = document.createElement('section');
+        sect.classList.add('item_2');
+        sect.innerHTML = element.innerHTML;
+
+        tree.replaceChild(sect, element);
+    }
+
+    return tree;
 }
